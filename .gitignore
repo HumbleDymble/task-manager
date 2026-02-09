@@ -1,0 +1,8 @@
+# WebStorm
+**.idea
+
+# Vite
+dist
+
+# Dependency directories
+node_modules
