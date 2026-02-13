@@ -38,7 +38,18 @@ const taskSchema = z.object({
   description: z.string().max(500, "Описание максимум 500 символов").optional(),
   status: z.enum(["todo", "inProgress", "done"]),
   priority: z.enum(["low", "medium", "high"]),
-  deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Обязательное поле"),
+  deadline: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Обязательное поле")
+    .refine(
+      (val) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(val + "T00:00:00");
+        return selected >= today;
+      },
+      { message: "Дедлайн не может быть в прошлом" },
+    ),
   tags: z.array(z.string()).min(1, "Как минимум один тег обязателен"),
 });
 
@@ -303,7 +314,10 @@ export const TaskFormPage: React.FC = () => {
                       type="date"
                       label="Дедлайн"
                       fullWidth
-                      slotProps={{ inputLabel: { shrink: true } }}
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                        htmlInput: { min: format(new Date(), "yyyy-MM-dd") },
+                      }}
                       error={!!errors.deadline}
                       helperText={errors.deadline?.message}
                       sx={inputSx}
